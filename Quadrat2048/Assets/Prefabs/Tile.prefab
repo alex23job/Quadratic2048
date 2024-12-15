@@ -357,4 +357,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   txtNumber: {fileID: 2816255920926735293}
   imgTile: {fileID: 5203295354624056551}
-  speed: 3
+  speed: 5
