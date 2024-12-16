@@ -8,14 +8,24 @@ public class LevelControl : MonoBehaviour
 
     private GameObject[] arTile;
     private int[] pole;
-    private int indMaxZn = 1;
-    private int[] arZn = { 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048};
+    private int indMaxZn = 0;
+    private int[] arZn = { 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048 };
+    private int[] arMaxInd = { 2048, 3072, 3584, 3840, 3968, 4032, 4064, 4080, 4088, 4092, 4094, 4095 };
+    private List<int> arRndZn = new();
 
     // Start is called before the first frame update
     void Start()
     {
         arTile = new GameObject[16];
         pole = new int[16];
+        int i, j, lim;
+        for(i = 0; i < 12; i++)
+        {
+            lim = 1; for (j = i; j < 11; j++) lim *= 2;
+            print($"lim = {lim}");
+            for (j = 0; j < lim; j++) arRndZn.Add(arZn[i]);
+        }
+        //print(arRndZn);
         GenerateTile();
     }
 
@@ -28,7 +38,7 @@ public class LevelControl : MonoBehaviour
     private void GenerateTile()
     {
         List<int> freeCeils = new List<int>();
-        int i, n, zn = 1;
+        int i, n, zn = 1, nzn;
         for (i = 0; i < 16; i++)
         {
             if (pole[i] == 0) freeCeils.Add(i);
@@ -36,7 +46,10 @@ public class LevelControl : MonoBehaviour
         if (freeCeils.Count > 0)
         {
             n = freeCeils[Random.Range(0, freeCeils.Count)];
-            zn = arZn[Random.Range(0, indMaxZn)];
+            //zn = arZn[Random.Range(0, indMaxZn)];
+            nzn = Random.Range(0, arMaxInd[indMaxZn]);
+            zn = arRndZn[nzn];
+            print($"num_zn => {nzn}    zn => {zn}");
             Vector3 pos = new Vector3(-3 + 2 * (n % 4), 3, -3 + 2 * (n / 4));
             Color col = Color.cyan;
             GameObject tile = Instantiate(tilePrefab, pos, Quaternion.identity);
@@ -74,101 +87,127 @@ public class LevelControl : MonoBehaviour
     public void OnClickDirection(int n)
     {
         int i;
-        if (n == 2)
+        bool isMove = true;
+        if (n == 0)
         {
-            for (i = 4; i < 16; i++)
+            while (isMove)
             {
-                if (pole[i] > 0)
+                isMove = false;
+                for (i = 15; i >= 0; i--)
                 {
-                    TileControl tc = arTile[i].GetComponent<TileControl>();
-                    if (i / 4 == 1)
+                    if (pole[i] > 0)
                     {
-                        if (pole[i - 4] == 0) MoveTile(i, i - 4); //tc.SetTarget(new Vector3(-3 + 2 * (i % 4), 0, -3));
-                        else
+                        if ((i / 4) < 3)
                         {
-                            if (pole[i - 4] == pole[i])
+                            if (pole[i + 4] == 0)
                             {
-                                pole[i] = 0; Destroy(arTile[i]); Destroy(arTile[i - 4]);
-                                UpdateTile(i - 4, pole[i - 4]);
-                            }
-                        }
-                    }
-                    if (i / 4 == 2)
-                    {
-                        if (pole[i - 4] == 0)
-                        {
-                            if (pole[i - 8] == 0) MoveTile(i, i - 8); //tc.SetTarget(new Vector3(-3 + 2 * (i % 4), 0, -3));
-                            else
-                            {
-                                if (pole[i - 8] == pole[i])
-                                {
-                                    pole[i] = 0; Destroy(arTile[i]); Destroy(arTile[i - 8]);
-                                    UpdateTile(i - 8, pole[i - 8]);
-                                }
-                                else
-                                {
-                                    MoveTile(i, i - 4);
-                                    //tc.SetTarget(new Vector3(-3 + 2 * (i % 4), 0, -1));
-                                }
-                            }
-                        }
-                        else
-                        {
-                            if (pole[i - 4] == pole[i])
-                            {
-                                pole[i] = 0; Destroy(arTile[i]); Destroy(arTile[i - 4]);
-                                UpdateTile(i - 4, pole[i - 4]);
-                            }
-                        }
-                    }
-                    if (i / 4 == 3)
-                    {
-                        if (pole[i - 4] == 0)
-                        {
-                            if (pole[i - 8] == 0)
-                            {
-                                if (pole[i - 12] == 0) MoveTile(i, i - 12); //tc.SetTarget(new Vector3(-3 + 2 * (i % 4), 0, -3));
-                                else
-                                {
-                                    if (pole[i - 12] == pole[i])
-                                    {
-                                        pole[i] = 0; Destroy(arTile[i]); Destroy(arTile[i - 12]);
-                                        UpdateTile(i - 12, pole[i - 12]);
-                                    }
-                                    else
-                                    {
-                                        MoveTile(i, i - 8);
-                                        //tc.SetTarget(new Vector3(-3 + 2 * (i % 4), 0, 1));
-                                    }
-                                }
+                                isMove = true;
+                                MoveTile(i, i + 4);
                             }
                             else
                             {
-                                if (pole[i - 8] == pole[i])
+                                if (pole[i] == pole[i + 4])
                                 {
-                                    pole[i] = 0; Destroy(arTile[i]); Destroy(arTile[i - 8]);
-                                    UpdateTile(i - 8, pole[i - 8]);
+                                    pole[i] = 0; Destroy(arTile[i]); Destroy(arTile[i + 4]);
+                                    UpdateTile(i + 4, pole[i + 4]);
+                                    isMove = true;
                                 }
-                                else
-                                {
-                                    MoveTile(i, i - 4);
-                                    //tc.SetTarget(new Vector3(-3 + 2 * (i % 4), 0, -1));
-                                }
-                            }
-                        }
-                        else
-                        {
-                            if (pole[i - 4] == pole[i])
-                            {
-                                pole[i] = 0; Destroy(arTile[i]); Destroy(arTile[i - 4]);
-                                UpdateTile(i - 4, pole[i - 4]);
                             }
                         }
                     }
                 }
             }
         }
-        Povtor(n);
+        if (n == 1)
+        {
+            while (isMove)
+            {
+                isMove = false;
+                for (i = 0; i < 16; i++)
+                {
+                    if (pole[i] > 0)
+                    {
+                        if ((i % 4) > 0)
+                        {
+                            if (pole[i - 1] == 0)
+                            {
+                                isMove = true;
+                                MoveTile(i, i - 1);
+                            }
+                            else
+                            {
+                                if (pole[i] == pole[i - 1])
+                                {
+                                    pole[i] = 0; Destroy(arTile[i]); Destroy(arTile[i - 1]);
+                                    UpdateTile(i - 1, pole[i - 1]);
+                                    isMove = true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (n == 2)
+        {
+            while (isMove)
+            {
+                isMove = false;
+                for (i = 0; i < 16; i++)
+                {
+                    if (pole[i] > 0)
+                    {
+                        if ((i / 4) > 0)
+                        {
+                            if (pole[i - 4] == 0)
+                            {
+                                isMove = true;
+                                MoveTile(i, i - 4);
+                            }
+                            else
+                            {
+                                if (pole[i] == pole[i - 4])
+                                {
+                                    pole[i] = 0; Destroy(arTile[i]); Destroy(arTile[i - 4]);
+                                    UpdateTile(i - 4, pole[i - 4]);
+                                    isMove = true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (n == 3)
+        {
+            while (isMove)
+            {
+                isMove = false;
+                for (i = 0; i < 16; i++)
+                {
+                    if (pole[i] > 0)
+                    {
+                        if ((i % 4) < 3)
+                        {
+                            if (pole[i + 1] == 0)
+                            {
+                                isMove = true;
+                                MoveTile(i, i + 1);
+                            }
+                            else
+                            {
+                                if (pole[i] == pole[i + 1])
+                                {
+                                    pole[i] = 0; Destroy(arTile[i]); Destroy(arTile[i + 1]);
+                                    UpdateTile(i + 1, pole[i + 1]);
+                                    isMove = true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
         GenerateTile();
     }
 
