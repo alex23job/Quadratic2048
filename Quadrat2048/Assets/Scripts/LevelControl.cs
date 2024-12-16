@@ -10,6 +10,7 @@ public class LevelControl : MonoBehaviour
     private int[] pole;
     private int indMaxZn = 0;
     private int[] arZn = { 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048 };
+    private Color[] arCol = { Color.cyan, Color.red, Color.yellow, Color.green, Color.blue, Color.magenta, new Color(0.7f, 0.6f, 0.3f), new Color(0.1f, 0.8f, 0.7f), new Color(0.9f, 0.7f, 0.8f), new Color(0.8f, 0.4f, 0.9f), new Color(0.5f, 0.8f, 0.3f), new Color(0.4f, 0.6f, 0.9f) };
     private int[] arMaxInd = { 2048, 3072, 3584, 3840, 3968, 4032, 4064, 4080, 4088, 4092, 4094, 4095 };
     private List<int> arRndZn = new();
 
@@ -26,7 +27,8 @@ public class LevelControl : MonoBehaviour
             for (j = 0; j < lim; j++) arRndZn.Add(arZn[i]);
         }
         //print(arRndZn);
-        GenerateTile();
+        Invoke("GenerateTile", 0.5f);
+        //GenerateTile();
     }
 
     // Update is called once per frame
@@ -49,9 +51,10 @@ public class LevelControl : MonoBehaviour
             //zn = arZn[Random.Range(0, indMaxZn)];
             nzn = Random.Range(0, arMaxInd[indMaxZn]);
             zn = arRndZn[nzn];
-            print($"num_zn => {nzn}    zn => {zn}");
+
             Vector3 pos = new Vector3(-3 + 2 * (n % 4), 3, -3 + 2 * (n / 4));
-            Color col = Color.cyan;
+            Color col = GetColor(zn);
+            print($"num_zn => {nzn}    zn => {zn}    col => {col}");
             GameObject tile = Instantiate(tilePrefab, pos, Quaternion.identity);
             tile.GetComponent<TileControl>().SetNumber(zn, col);
             pole[n] = zn;
@@ -62,6 +65,26 @@ public class LevelControl : MonoBehaviour
         else
         {   //  Game over
 
+        }
+    }
+
+    private Color GetColor(int zn)
+    {
+        switch(zn)
+        {
+            case 1: return Color.cyan;
+            case 2: return Color.red;
+            case 4: return Color.yellow;
+            case 8: return Color.green;
+            case 16: return Color.blue;
+            case 32: return Color.magenta;
+            case 64: return new Color(0.7f, 0.6f, 0.3f);
+            case 128: return new Color(0.1f, 0.8f, 0.7f);
+            case 256: return new Color(0.9f, 0.7f, 0.8f);
+            case 512: return new Color(0.8f, 0.4f, 0.9f);
+            case 1024: return new Color(0.5f, 0.8f, 0.3f);
+            case 2048: return new Color(0.4f, 0.6f, 0.9f);
+            default: return Color.cyan;
         }
     }
     private void UpdateTile(int num_pos, int tileZn)
@@ -76,7 +99,7 @@ public class LevelControl : MonoBehaviour
         else
         {
             Vector3 pos = new Vector3(-3 + 2 * (num_pos % 4), 0.5f, -3 + 2 * (num_pos / 4));
-            Color col = Color.cyan;
+            Color col = GetColor(zn);
             GameObject tile = Instantiate(tilePrefab, pos, Quaternion.identity);
             tile.GetComponent<TileControl>().SetNumber(zn, col);
             pole[num_pos] = zn;
