@@ -69,7 +69,7 @@ public class LevelControl : MonoBehaviour
         }
         else
         {   //  Game over
-
+            ui_Control.ViewLossPanel();
         }
     }
 
@@ -99,7 +99,7 @@ public class LevelControl : MonoBehaviour
         if (zn > arZn[indMaxZn]) indMaxZn++;
         if (indMaxZn >= arZn.Length)
         {   //  Win
-
+            ui_Control.ViewWinPanel();
         }
         else
         {
