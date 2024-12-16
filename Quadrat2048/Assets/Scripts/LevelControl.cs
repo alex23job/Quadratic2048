@@ -5,6 +5,7 @@ using UnityEngine;
 public class LevelControl : MonoBehaviour
 {
     [SerializeField] private GameObject tilePrefab;
+    [SerializeField] private UI_control ui_Control;
 
     private GameObject[] arTile;
     private int[] pole;
@@ -14,16 +15,19 @@ public class LevelControl : MonoBehaviour
     private int[] arMaxInd = { 2048, 3072, 3584, 3840, 3968, 4032, 4064, 4080, 4088, 4092, 4094, 4095 };
     private List<int> arRndZn = new();
 
+    private int score = 0;
+
     // Start is called before the first frame update
     void Start()
     {
+        score = 0;
         arTile = new GameObject[16];
         pole = new int[16];
         int i, j, lim;
         for(i = 0; i < 12; i++)
         {
             lim = 1; for (j = i; j < 11; j++) lim *= 2;
-            print($"lim = {lim}");
+            //print($"lim = {lim}");
             for (j = 0; j < lim; j++) arRndZn.Add(arZn[i]);
         }
         //print(arRndZn);
@@ -51,10 +55,11 @@ public class LevelControl : MonoBehaviour
             //zn = arZn[Random.Range(0, indMaxZn)];
             nzn = Random.Range(0, arMaxInd[indMaxZn]);
             zn = arRndZn[nzn];
-
+            score += zn;
+            ui_Control.ViewScore(score);
             Vector3 pos = new Vector3(-3 + 2 * (n % 4), 3, -3 + 2 * (n / 4));
             Color col = GetColor(zn);
-            print($"num_zn => {nzn}    zn => {zn}    col => {col}");
+            //print($"num_zn => {nzn}    zn => {zn}    col => {col}");
             GameObject tile = Instantiate(tilePrefab, pos, Quaternion.identity);
             tile.GetComponent<TileControl>().SetNumber(zn, col);
             pole[n] = zn;
@@ -231,43 +236,7 @@ public class LevelControl : MonoBehaviour
                 }
             }
         }
-        GenerateTile();
-    }
-
-    private void Povtor(int direction)
-    {
-        for(int i = 0; i < 16; i++)
-        {
-            if (pole[i] > 0)
-            {
-                if (((i % 4) < 3) && (pole[i] == pole[i + 1]))
-                {
-                    if (direction == 3)
-                    {
-                        pole[i] = 0; Destroy(arTile[i]); Destroy(arTile[i + 1]);
-                        UpdateTile(i + 1, pole[i + 1]);
-                    }
-                    else
-                    {
-                        pole[i + 1] = 0; Destroy(arTile[i]); Destroy(arTile[i + 1]);
-                        UpdateTile(i, pole[i]);
-                    }
-                }
-                if (((i / 4) < 3) && (pole[i] == pole[i + 4]))
-                {
-                    if (direction == 0)
-                    {
-                        pole[i] = 0; Destroy(arTile[i]); Destroy(arTile[i + 4]);
-                        UpdateTile(i + 4, pole[i + 4]);
-                    }
-                    else
-                    {
-                        pole[i + 4] = 0; Destroy(arTile[i]); Destroy(arTile[i + 4]);
-                        UpdateTile(i, pole[i]);
-                    }
-                }
-            }
-        }
+        Invoke("GenerateTile", 0.5f);
     }
 
     private void MoveTile(int src, int dst)
@@ -276,5 +245,23 @@ public class LevelControl : MonoBehaviour
         tc.SetTarget(new Vector3(-3 + 2 * (dst % 4), 0.5f, -3 + 2 * (dst / 4)));
         pole[dst] = pole[src];pole[src] = 0;
         arTile[dst] = arTile[src];arTile[src] = null;
+    }
+
+    public void OnClickDel_1_2()
+    {
+        Deleting1_2();
+    }
+
+    public void Deleting1_2()
+    {
+        for (int i = 0; i < 16; i++)
+        {
+            if (pole[i] == 1 || pole[i] == 2)
+            {
+                pole[i] = 0;
+                Destroy(arTile[i]);
+                arTile[i] = null;
+            }
+        }
     }
 }
